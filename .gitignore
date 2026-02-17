@@ -1,0 +1,7 @@
+lsm_create/vmlinux.h
+lsm_delete/vmlinux.h
+syscall/vmlinux.h
+
+lsm_create/prog.bpf.o
+lsm_delete/prog.bpf.o
+syscall/prog.bpf.o
