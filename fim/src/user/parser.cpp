@@ -323,6 +323,11 @@ int Parser::parseRule(const Token &token) {
     k.inode = st2.st_ino;
     k.dev = st_to_dev_sb(st2.st_dev);
 
+#ifdef DEBUG_PARSER
+    printf("DEBUG_PARSER: include_dir: %lld %lld %s\n", k.inode, k.dev,
+           path.c_str());
+#endif
+
     include_dir->push_back({k, value});
   }
 
