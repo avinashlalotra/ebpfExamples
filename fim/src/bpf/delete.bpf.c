@@ -15,11 +15,26 @@
  * @delegated_inode: returns victim inode, if the inode is delegated.
  */
 
+struct {
+  __uint(type, BPF_MAP_TYPE_ARRAY);
+  __uint(max_entries, 1);
+  __type(key, __u32);
+  __type(value, __u64);
+} counter_map SEC(".maps");
+
 SEC("kprobe/vfs_unlink")
 int BPF_KPROBE(fentry_vfs_unlink, struct mnt_idmap *idmap, struct inode *dir,
                struct dentry *dentry, struct inode **delegated_inode) {
 
   struct VALUE *value;
+
+  __u32 key_counter = 0;
+  __u64 *val_counter;
+
+  val_counter = bpf_map_lookup_elem(&counter_map, &key_counter);
+  if (val_counter) {
+    __sync_fetch_and_add(val_counter, 1);
+  }
 
   // check if parent directory is monitored
   value = is_monitored(dir);
@@ -50,6 +65,14 @@ int BPF_KRETPROBE(fexit_vfs_unlink, int ret) {
   struct EVENT *event;
   struct dentry_ctx *dentry_ctx;
   u64 pid_tgid;
+
+  __u32 key_counter = 0;
+  __u64 *val_counter;
+
+  val_counter = bpf_map_lookup_elem(&counter_map, &key_counter);
+  if (val_counter) {
+    __sync_fetch_and_add(val_counter, 1);
+  }
 
   pid_tgid = bpf_get_current_pid_tgid();
   // read the saved data at fentry
@@ -110,6 +133,14 @@ int BPF_KPROBE(fentry_vfs_rmdir, struct mnt_idmap *idmap, struct inode *dir,
   struct inode *ino;
   u64 pid_tgid;
 
+  __u32 key_counter = 0;
+  __u64 *val_counter;
+
+  val_counter = bpf_map_lookup_elem(&counter_map, &key_counter);
+  if (val_counter) {
+    __sync_fetch_and_add(val_counter, 1);
+  }
+
   // check if folder is monitored
   ino = BPF_CORE_READ(dentry, d_inode);
   value = is_monitored(ino);
@@ -145,6 +176,14 @@ int BPF_KRETPROBE(fexit_vfs_rmdir, int ret) {
   struct KEY key = {};
   struct dentry_ctx *dentry_ctx;
   u64 pid_tgid;
+
+  __u32 key_counter = 0;
+  __u64 *val_counter;
+
+  val_counter = bpf_map_lookup_elem(&counter_map, &key_counter);
+  if (val_counter) {
+    __sync_fetch_and_add(val_counter, 1);
+  }
 
   pid_tgid = bpf_get_current_pid_tgid();
   // read the saved data at fentry

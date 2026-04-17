@@ -10,11 +10,12 @@
 
 class Events {
 public:
-  Events(const struct bpf_map *map);
+  Events(const struct bpf_map *map, int counter_map_fd);
   ~Events();
 
   void producer();
   void consumer();
+  void counter_polling();
   void stop();
 
 public:
@@ -25,6 +26,7 @@ public:
   std::condition_variable queue_cv;
 
   std::atomic<bool> stop_flag{false};
+  int counter_map_fd;
 };
 
 #endif

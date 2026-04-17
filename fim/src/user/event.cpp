@@ -3,9 +3,12 @@
 #include "payload.hpp"
 #include "processevent.hpp"
 #include "userspacefilter.hpp"
+#include <bpf/bpf.h>
 #include <bpf/libbpf.h>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <thread>
 
 int callback(void *ctx, void *data, size_t size);
 void print_event(EVENT *event);
@@ -14,7 +17,8 @@ extern ProcessEvent peventobj;
 extern UserspaceFilter filter;
 extern Logger logger;
 
-Events::Events(const struct bpf_map *map) {
+Events::Events(const struct bpf_map *map, int counter_map_fd)
+    : counter_map_fd(counter_map_fd) {
 
   int fd = bpf_map__fd(map);
   if (fd < 0) {
@@ -79,6 +83,21 @@ void Events::consumer() {
 void Events::stop() {
   stop_flag = true;
   queue_cv.notify_all(); // wake consumer
+}
+
+void Events::counter_polling() {
+  __u32 key = 0;
+  __u64 value = 0;
+  while (!stop_flag) {
+    if (bpf_map_lookup_elem(counter_map_fd, &key, &value) == 0) {
+      if (value > 0) {
+        printf("Global counter: %llu\n", value);
+      }
+    } else {
+      // printf("Failed to read global counter\n");
+    }
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
 }
 
 // push data to queue

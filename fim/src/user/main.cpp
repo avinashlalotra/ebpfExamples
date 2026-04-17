@@ -60,6 +60,7 @@ int main(int argc, char **argv) {
   Events *events;
   thread producer_thread;
   thread consumer_thread;
+  thread counter_thread;
   Parser *parser;
   int err;
   fentry_bpf *skel;
@@ -100,7 +101,7 @@ int main(int argc, char **argv) {
   logger.init(parser);
   fprintf(stderr, "Successfully initialized logger\n");
 
-  events = new Events(skel->maps.rb);
+  events = new Events(skel->maps.rb, bpf_map__fd(skel->maps.counter_map));
 
   printf("Successfully started!\n");
   printf("Run: sudo cat /sys/kernel/debug/tracing/trace_pipe\n");
@@ -111,6 +112,8 @@ int main(int argc, char **argv) {
 
   consumer_thread = thread([&]() { events->consumer(); });
 
+  counter_thread = thread([&]() { events->counter_polling(); });
+
   while (!signal_received) {
     sleep(1);
   }
@@ -118,6 +121,8 @@ int main(int argc, char **argv) {
   events->stop();
   producer_thread.join();
   consumer_thread.join();
+  if (counter_thread.joinable())
+    counter_thread.join();
   delete events;
   delete parser;
 
