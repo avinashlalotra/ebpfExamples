@@ -7,7 +7,7 @@
 
 struct InodeMap_t {
   __uint(type, BPF_MAP_TYPE_HASH);
-  __uint(max_entries, 1000);
+  __uint(max_entries, INODE_MAP_MAX_ENTRIES);
   __uint(key_size, sizeof(struct KEY));
   __uint(value_size, sizeof(struct VALUE));
 };

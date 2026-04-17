@@ -392,5 +392,8 @@ int Parser::compile() {
     }
   }
 
+  fprintf(stderr, "Total Entries in Inode Map: %ld\n", include_dir->size());
+  fprintf(stderr, "Max size of Inode Map: %d\n", INODE_MAP_MAX_ENTRIES);
+
   return 0;
 }

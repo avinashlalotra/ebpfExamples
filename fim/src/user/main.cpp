@@ -64,12 +64,15 @@ int main(int argc, char **argv) {
   int err;
   fentry_bpf *skel;
 
+  fprintf(stderr, "Starting program\n");
   parser = new Parser("config.txt");
   err = parser->compile();
   if (err) {
     fprintf(stderr, "Failed to compile parser\n");
     return 1;
   }
+
+  fprintf(stderr, "Successfully compiled parser\n");
 
   skel = fentry_bpf::open_and_load();
 
@@ -78,16 +81,24 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  fprintf(stderr, "Successfully opened skeleton\n");
+
   err = fentry_bpf::attach(skel);
   if (err) {
     fprintf(stderr, "Failed to attach skeleton\n");
     goto cleanup;
   }
 
+  fprintf(stderr, "Successfully attached skeleton\n");
+
   load_Inode_map(parser, skel);
+  fprintf(stderr, "Successfully loaded map\n");
   peventobj.initProcessEvent();
+  fprintf(stderr, "Successfully initialized process event\n");
   filter.initFilter(parser);
+  fprintf(stderr, "Successfully initialized filter\n");
   logger.init(parser);
+  fprintf(stderr, "Successfully initialized logger\n");
 
   events = new Events(skel->maps.rb);
 

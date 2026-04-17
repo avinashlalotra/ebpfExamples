@@ -1,5 +1,8 @@
 #ifndef USER_TYPES_H
 #define USER_TYPES_H
+
+#define INODE_MAP_MAX_ENTRIES 1000
+
 #ifdef CONFIG_BPF
 #include "vmlinux.h"
 #ifndef S_ISDIR

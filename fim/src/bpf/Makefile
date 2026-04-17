@@ -42,12 +42,14 @@ ifeq ($(CONFIG_RENAME),y)
 BPF_SRCS += rename.bpf.c
 endif
 
+
+
 # ---- Objects ----
 BPF_OBJS := $(BPF_SRCS:.bpf.c=.bpf.o)
 
 # ---- Compiler flags ----
 BPF_CFLAGS := -g -O2 -target bpf -mcpu=v3 \
-              -D__TARGET_ARCH_x86 \
+              -D__TARGET_ARCH_$(ARCH) \
               -I$(BPF_INCLUDE_DIR) -I$(INCLUDE_DIR)
 
 ifeq ($(CONFIG_CREATE),y)

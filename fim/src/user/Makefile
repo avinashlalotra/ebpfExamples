@@ -3,7 +3,7 @@ INCLUDE = ../../include
 PROG_NAME = fentry
 
 CXX = g++
-CXXFLAGS = -O2 -std=c++20 -I$(INCLUDE_DIR) -I$(INCLUDE) -pthread
+CXXFLAGS = -std=c++20 -I$(INCLUDE_DIR) -I$(INCLUDE) -pthread
 LDFLAGS = -lbpf -pthread
 
 # Sources that are shared (no main here)
