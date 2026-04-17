@@ -1,5 +1,7 @@
+ARCH ?= x86
+
 all: vmlinux
-	clang -O2 -g -target bpf -D__TARGET_ARCH_x86 -I. -c main.c -o prog.bpf.o
+	clang -O2 -g -target bpf -D__TARGET_ARCH_$(ARCH) -I. -c main.c -o prog.bpf.o
 
 load:
 	sudo bpftool prog loadall prog.bpf.o /sys/fs/bpf/my_kprobe_prog autoattach
