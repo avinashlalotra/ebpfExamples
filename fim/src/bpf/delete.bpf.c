@@ -21,7 +21,7 @@ int BPF_KPROBE(fentry_vfs_unlink, struct mnt_idmap *idmap, struct inode *dir,
 
   struct VALUE *value;
 
-  bpf_printk("fentry_vfs_unlink: %d", BPF_CORE_READ(dentry, d_inode));
+  bpf_printk("fentry_vfs_unlink: %d", BPF_CORE_READ(dir, i_ino));
   // check if parent directory is monitored
   value = is_monitored(dir);
   if (!value)
@@ -112,13 +112,14 @@ int BPF_KPROBE(fentry_vfs_rmdir, struct mnt_idmap *idmap, struct inode *dir,
   struct inode *ino;
   u64 pid_tgid;
 
-  bpf_printk("fentry_vfs_rmdir: %d", BPF_CORE_READ(dentry, d_inode));
+  bpf_printk("fentry_vfs_rmdir: %d", BPF_CORE_READ(dentry, d_inode, i_ino));
   // check if folder is monitored
   ino = BPF_CORE_READ(dentry, d_inode);
   value = is_monitored(ino);
   if (!value)
     return 0;
 
+  bpf_printk("found val in table");
   pid_tgid = bpf_get_current_pid_tgid();
   // populate the event and store in lru hash map
   u32 key = 0;

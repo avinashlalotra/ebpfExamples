@@ -54,6 +54,7 @@ static __always_inline struct VALUE *is_monitored(struct inode *dir) {
   key.inode = BPF_CORE_READ(dir, i_ino);
   key.dev = BPF_CORE_READ(dir, i_sb, s_dev);
 
+  bpf_printk("is_monitored: %ld,%ld", key.inode, key.dev);
   value = (struct VALUE *)bpf_map_lookup_elem(&InodeMap, &key);
 
   return value;

@@ -233,7 +233,7 @@ void Parser::printParser() const {
   }
 }
 #endif
-uint64_t st_to_dev_sb(dev_t st_dev) {
+__u32 st_to_dev_sb(dev_t st_dev) {
   unsigned int maj = major(st_dev);
   unsigned int min = minor(st_dev);
 
@@ -324,7 +324,7 @@ int Parser::parseRule(const Token &token) {
     k.dev = st_to_dev_sb(st2.st_dev);
 
 #ifdef DEBUG_PARSER
-    printf("DEBUG_PARSER: include_dir: %lld %lld %s\n", k.inode, k.dev,
+    printf("DEBUG_PARSER: include_dir: %u %u %s\n", k.inode, k.dev,
            path.c_str());
 #endif
 

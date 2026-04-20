@@ -30,8 +30,8 @@
 /* ───────────────────────────────────────────── */
 
 struct KEY {
-  __u64 inode;
-  __u64 dev;
+  __u32 inode; /* unsigned long i_ino  = 32-bit on ARM32 */
+  __u32 dev;   /* dev_t         s_dev  = 32-bit always   */
 };
 
 struct VALUE {
