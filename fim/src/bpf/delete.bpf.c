@@ -21,6 +21,7 @@ int BPF_KPROBE(fentry_vfs_unlink, struct mnt_idmap *idmap, struct inode *dir,
 
   struct VALUE *value;
 
+  bpf_printk("fentry_vfs_unlink: %d", BPF_CORE_READ(dentry, d_inode));
   // check if parent directory is monitored
   value = is_monitored(dir);
   if (!value)
@@ -51,6 +52,7 @@ int BPF_KRETPROBE(fexit_vfs_unlink, int ret) {
   struct dentry_ctx *dentry_ctx;
   u64 pid_tgid;
 
+  bpf_printk("fexit_vfs_unlink: %d", ret);
   pid_tgid = bpf_get_current_pid_tgid();
   // read the saved data at fentry
   dentry_ctx = bpf_map_lookup_elem(&LruMap, &pid_tgid);
@@ -110,6 +112,7 @@ int BPF_KPROBE(fentry_vfs_rmdir, struct mnt_idmap *idmap, struct inode *dir,
   struct inode *ino;
   u64 pid_tgid;
 
+  bpf_printk("fentry_vfs_rmdir: %d", BPF_CORE_READ(dentry, d_inode));
   // check if folder is monitored
   ino = BPF_CORE_READ(dentry, d_inode);
   value = is_monitored(ino);
@@ -146,6 +149,7 @@ int BPF_KRETPROBE(fexit_vfs_rmdir, int ret) {
   struct dentry_ctx *dentry_ctx;
   u64 pid_tgid;
 
+  bpf_printk("fexit_vfs_rmdir: %d", ret);
   pid_tgid = bpf_get_current_pid_tgid();
   // read the saved data at fentry
   dentry_ctx = bpf_map_lookup_elem(&LruMap, &pid_tgid);
