@@ -1,5 +1,7 @@
 BPF_OBJ_NAME = fentry_bpf
 
+ARCH ?= x86
+
 CONFIG_CREATE=y
 CONFIG_DELETE=y
 CONFIG_MODIFY=y
@@ -10,6 +12,7 @@ export CONFIG_CREATE
 export CONFIG_DELETE
 export CONFIG_MODIFY
 export CONFIG_RENAME
+export ARCH
 
 all:
 	@echo "Building eBPF program"
