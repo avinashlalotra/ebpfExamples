@@ -17,10 +17,9 @@ writev:    file_permission+ kretprobe/vfs_writev       -- path verified
 */
 
 #ifdef CONFIG_MODIFY
-// ─── lsm/file_permission ─────────────────────────────────────────────────────
-//
+
 // Fires before any read/write op. Filtered to MAY_WRITE only.
-SEC("lsm/file_permission")
+SEC("kprobe/security_file_permission")
 int BPF_PROG(fim_file_permission, struct file *file, int mask) {
   struct KEY inode_key = {};
   struct EVENT *event;
@@ -110,47 +109,6 @@ int BPF_KRETPROBE(fexit_vfs_write, ssize_t ret) {
                    sizeof(event->filepath));
 
   print_event("fexit_vfs_write", event);
-  bpf_ringbuf_submit(event, 0);
-
-out:
-  bpf_map_delete_elem(&LruMap, &pid_tgid);
-  return 0;
-}
-
-/* returns 0 on succes
-    @vlen Number of bytes written
-*/
-SEC("fexit/vfs_writev")
-int BPF_PROG(fexit_vfs_writev, struct file *file, const struct iovec *vec,
-             unsigned long vlen, loff_t *pos, rwf_t flags, ssize_t ret) {
-  struct EVENT *event;
-  struct dentry_ctx *dentry_ctx;
-  u64 pid_tgid;
-
-  pid_tgid = bpf_get_current_pid_tgid();
-  dentry_ctx = bpf_map_lookup_elem(&LruMap, &pid_tgid);
-  if (!dentry_ctx)
-    return 0;
-
-  if (ret < 0)
-    goto out;
-
-  event = bpf_ringbuf_reserve(&rb, sizeof(*event), 0);
-  if (!event)
-    goto out;
-
-  event->before_size = dentry_ctx->before_size;
-  event->change_type = WRITE_EVENT;
-  event->uid = bpf_get_current_uid_gid() >> 32;
-  event->bytes_written = vlen;
-  event->file_size = BPF_CORE_READ(file, f_path.dentry, d_inode, i_size);
-  event->len = dentry_ctx->len;
-  getTTY(event);
-
-  __builtin_memcpy(event->filepath, dentry_ctx->filepath,
-                   sizeof(event->filepath));
-
-  print_event("fexit_vfs_writev", event);
   bpf_ringbuf_submit(event, 0);
 
 out:
