@@ -9,6 +9,7 @@
 #define S_IFMT 00170000
 #define S_IFDIR 0040000
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#define DIR_SIZE 4096
 #endif
 #else
 #include <linux/types.h>
@@ -69,6 +70,34 @@ struct EVENT {
   __u32 tty_minor;
   __u64 len;
   char filepath[MAX_PATH_LEN];
+};
+struct write_ctx {
+  __u64 before_size;
+  char filepath[MAX_PATH_LEN];
+  __u64 len;
+};
+
+struct delete_ctx {
+  __u64 before_size;
+  char filepath[MAX_PATH_LEN];
+  __u64 len;
+  __u32 inode;
+  __u32 dev;
+};
+
+struct create_ctx {
+  __u32 child_inode;
+  __u32 child_dev;
+  __u32 i_mode;
+  char filepath[MAX_PATH_LEN];
+  __u64 len;
+};
+
+union ctx {
+  struct dentry_ctx dentry_ctx;
+  struct write_ctx write_ctx;
+  struct delete_ctx delete_ctx;
+  struct create_ctx create_ctx;
 };
 
 #endif /* USER_TYPES_H */

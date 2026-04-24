@@ -79,20 +79,17 @@ static __always_inline void print_event(const char *msg, struct EVENT *event) {
   }
 }
 
-static __always_inline void update_dir_map(struct inode *inode, bool add) {
+static __always_inline void update_dir_map(union ctx *ctx_shared, bool add) {
   struct KEY key = {};
   struct VALUE value = {1};
-  umode_t mode;
+  __u32 mode;
 
-  if (!inode)
-    return;
-
-  mode = BPF_CORE_READ(inode, i_mode);
+  mode = ctx_shared->create_ctx.i_mode;
   if (!S_ISDIR(mode))
     return;
 
-  key.inode = BPF_CORE_READ(inode, i_ino);
-  key.dev = BPF_CORE_READ(inode, i_sb, s_dev);
+  key.inode = ctx_shared->create_ctx.child_inode;
+  key.dev = ctx_shared->create_ctx.child_dev;
 
   if (add)
     bpf_map_update_elem(&InodeMap, &key, &value, BPF_ANY);

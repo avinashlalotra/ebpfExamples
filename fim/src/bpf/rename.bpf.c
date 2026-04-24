@@ -80,7 +80,7 @@ int BPF_PROG(fentry_vfs_rename, struct renamedata *rd) {
   }
 
   /* Capture old path (used for DELETE event) */
-  construct_path(old_dentry, d_ctx->filepath, &d_ctx->len);
+  construct_path(old_dentry, d_ctx->filepath, &d_ctx->len, 0);
 
   u64 pid = bpf_get_current_pid_tgid();
   bpf_map_update_elem(&LruMap, &pid, d_ctx, BPF_ANY);
@@ -133,7 +133,7 @@ int BPF_PROG(fexit_vfs_rename, struct renamedata *rd, int ret) {
     goto cleanup;
 
   fill_rename_event(event_c, old_ctx->before_size);
-  construct_path(new_dentry, event_c->filepath, &event_c->len);
+  construct_path(new_dentry, event_c->filepath, &event_c->len, 0);
 
   if (old_ctx->overwrite) {
     event_c->before_size = old_ctx->target_size;

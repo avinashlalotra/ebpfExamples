@@ -21,13 +21,13 @@ struct LruMap_t {
   __uint(type, BPF_MAP_TYPE_LRU_HASH);
   __uint(max_entries, 1024);
   __uint(key_size, sizeof(u64));
-  __uint(value_size, sizeof(struct dentry_ctx));
+  __uint(value_size, sizeof(union ctx));
 };
 struct heap_map_t {
   __uint(type, BPF_MAP_TYPE_PERCPU_ARRAY);
   __uint(max_entries, 1);
-  __type(key, u32);
-  __type(value, struct dentry_ctx);
+  __uint(key_size, sizeof(u32));
+  __uint(value_size, sizeof(union ctx));
 };
 
 extern struct InodeMap_t InodeMap SEC(".maps");

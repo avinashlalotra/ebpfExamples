@@ -12,23 +12,26 @@
 /* coverage 90%
 
 write:     file_permission+ kretprobe/vfs_write        -- path verified
-writev:    file_permission+ kretprobe/vfs_writev       -- path verified
+
+ebpf:
+  before_size
+  bytes_written
+  tty details
+
+
 
 */
 
 #ifdef CONFIG_MODIFY
 
 // Fires before any read/write op. Filtered to MAY_WRITE only.
-SEC("kprobe/security_file_permission")
-int BPF_PROG(fim_file_permission, struct file *file, int mask) {
+SEC("kprobe/vfs_write")
+int BPF_KPROBE(fim_vfs_write, struct file *file, const char *buf, size_t count,
+               loff_t *pos) {
   struct KEY inode_key = {};
-  struct EVENT *event;
   __u32 zero_key = 0;
-  struct dentry_ctx *dentry_ctx;
+  union ctx *ctx_shared;
   u64 pid_tgid;
-
-  if (!(mask & MAY_WRITE))
-    return 0;
 
   if (!file)
     return 0;
@@ -42,36 +45,25 @@ int BPF_PROG(fim_file_permission, struct file *file, int mask) {
   if (!bpf_map_lookup_elem(&InodeMap, &inode_key))
     return 0;
 
-  event = bpf_ringbuf_reserve(&rb, sizeof(*event), 0);
-  if (!event)
+  ctx_shared = bpf_map_lookup_elem(&heap_map, &zero_key);
+  if (!ctx_shared)
     return 0;
 
-  event->before_size = BPF_CORE_READ(file, f_path.dentry, d_inode, i_size);
-  event->file_size = -1;
-  event->uid = bpf_get_current_uid_gid() >> 32;
-  event->change_type = WRITE_INTENT;
-  event->bytes_written = 0;
+  __builtin_memset(ctx_shared, 0, sizeof(*ctx_shared));
+
+  ctx_shared->write_ctx.before_size =
+      BPF_CORE_READ(file, f_path.dentry, d_inode, i_size);
   pid_tgid = bpf_get_current_pid_tgid();
-  getTTY(event);
+
   struct dentry *dentry = BPF_CORE_READ(file, f_path.dentry);
-  construct_path(dentry, event->filepath, &event->len);
+  construct_path(dentry, ctx_shared->write_ctx.filepath,
+                 &ctx_shared->write_ctx.len, 0);
 
-  bpf_printk("file_permission: filename=%s before=%lld", event->filepath,
-             event->before_size);
+  bpf_printk("vfs_write_kprobe: filename=%s before=%lld",
+             ctx_shared->write_ctx.filepath, ctx_shared->write_ctx.before_size);
 
-  dentry_ctx = bpf_map_lookup_elem(&heap_map, &zero_key);
-  if (!dentry_ctx)
-    goto submit;
+  bpf_map_update_elem(&LruMap, &pid_tgid, ctx_shared, BPF_ANY);
 
-  __builtin_memset(dentry_ctx, 0, sizeof(*dentry_ctx));
-  dentry_ctx->before_size = event->before_size;
-  __builtin_memcpy(dentry_ctx->filepath, event->filepath, MAX_PATH_LEN);
-  dentry_ctx->len = event->len;
-
-  bpf_map_update_elem(&LruMap, &pid_tgid, dentry_ctx, BPF_ANY);
-
-submit:
-  bpf_ringbuf_submit(event, 0);
   return 0;
 }
 
@@ -83,12 +75,12 @@ int BPF_KRETPROBE(fexit_vfs_write, ssize_t ret) {
 
   bpf_printk("kretprobe_vfs_write: ret=%lld", ret);
   struct EVENT *event;
-  struct dentry_ctx *dentry_ctx;
+  union ctx *ctx_shared;
   u64 pid_tgid;
 
   pid_tgid = bpf_get_current_pid_tgid();
-  dentry_ctx = bpf_map_lookup_elem(&LruMap, &pid_tgid);
-  if (!dentry_ctx)
+  ctx_shared = bpf_map_lookup_elem(&LruMap, &pid_tgid);
+  if (!ctx_shared)
     return 0;
 
   if (ret <= 0)
@@ -98,17 +90,17 @@ int BPF_KRETPROBE(fexit_vfs_write, ssize_t ret) {
   if (!event)
     goto out;
 
-  event->before_size = dentry_ctx->before_size;
+  event->before_size = ctx_shared->write_ctx.before_size;
   event->change_type = WRITE_EVENT;
   event->uid = bpf_get_current_uid_gid() >> 32;
   event->bytes_written = ret;
-  event->len = dentry_ctx->len;
+  event->len = ctx_shared->write_ctx.len;
   getTTY(event);
 
-  __builtin_memcpy(event->filepath, dentry_ctx->filepath,
+  __builtin_memcpy(event->filepath, ctx_shared->write_ctx.filepath,
                    sizeof(event->filepath));
 
-  print_event("fexit_vfs_write", event);
+  print_event("vfs_write_kretprobe", event);
   bpf_ringbuf_submit(event, 0);
 
 out:

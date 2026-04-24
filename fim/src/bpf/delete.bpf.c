@@ -30,18 +30,20 @@ int BPF_KPROBE(fentry_vfs_unlink, struct mnt_idmap *idmap, struct inode *dir,
   u64 pid_tgid = bpf_get_current_pid_tgid();
   // populate the event and store in lru hash map
   u32 key = 0;
-  struct dentry_ctx *dentry_ctx;
+  union ctx *ctx_shared;
 
-  dentry_ctx = bpf_map_lookup_elem(&heap_map, &key);
-  if (!dentry_ctx)
+  ctx_shared = bpf_map_lookup_elem(&heap_map, &key);
+  if (!ctx_shared)
     return 0;
-  __builtin_memset(dentry_ctx, 0, sizeof(*dentry_ctx));
+  __builtin_memset(ctx_shared, 0, sizeof(*ctx_shared));
 
-  dentry_ctx->before_size = BPF_CORE_READ(dentry, d_inode, i_size);
-  __builtin_memset(dentry_ctx->filepath, 0, sizeof(dentry_ctx->filepath));
-  construct_path(dentry, dentry_ctx->filepath, &dentry_ctx->len);
+  ctx_shared->delete_ctx.before_size = BPF_CORE_READ(dentry, d_inode, i_size);
+  __builtin_memset(ctx_shared->delete_ctx.filepath, 0,
+                   sizeof(ctx_shared->delete_ctx.filepath));
+  construct_path(dentry, ctx_shared->delete_ctx.filepath,
+                 &ctx_shared->delete_ctx.len);
 
-  bpf_map_update_elem(&LruMap, &pid_tgid, dentry_ctx, BPF_ANY);
+  bpf_map_update_elem(&LruMap, &pid_tgid, ctx_shared, BPF_ANY);
   return 0;
 }
 
@@ -49,14 +51,14 @@ SEC("kretprobe/vfs_unlink")
 int BPF_KRETPROBE(fexit_vfs_unlink, int ret) {
 
   struct EVENT *event;
-  struct dentry_ctx *dentry_ctx;
+  union ctx *ctx_shared;
   u64 pid_tgid;
 
   bpf_printk("fexit_vfs_unlink: %d", ret);
   pid_tgid = bpf_get_current_pid_tgid();
   // read the saved data at fentry
-  dentry_ctx = bpf_map_lookup_elem(&LruMap, &pid_tgid);
-  if (!dentry_ctx)
+  ctx_shared = bpf_map_lookup_elem(&LruMap, &pid_tgid);
+  if (!ctx_shared)
     return 0;
 
   if (ret < 0)
@@ -67,15 +69,15 @@ int BPF_KRETPROBE(fexit_vfs_unlink, int ret) {
     goto out;
 
   // populate the event
-  event->before_size = dentry_ctx->before_size;
+  event->before_size = ctx_shared->delete_ctx.before_size;
   event->change_type = DELETE_EVENT;
   event->uid = bpf_get_current_uid_gid() >> 32;
   event->bytes_written = 0;
   event->file_size = 0;
-  event->len = dentry_ctx->len;
+  event->len = ctx_shared->delete_ctx.len;
   getTTY(event);
 
-  __builtin_memcpy(event->filepath, dentry_ctx->filepath,
+  __builtin_memcpy(event->filepath, ctx_shared->delete_ctx.filepath,
                    sizeof(event->filepath));
 
   print_event("fexit_vfs_unlink", event);
@@ -123,21 +125,23 @@ int BPF_KPROBE(fentry_vfs_rmdir, struct mnt_idmap *idmap, struct inode *dir,
   pid_tgid = bpf_get_current_pid_tgid();
   // populate the event and store in lru hash map
   u32 key = 0;
-  struct dentry_ctx *dentry_ctx;
+  union ctx *ctx_shared;
 
-  dentry_ctx = bpf_map_lookup_elem(&heap_map, &key);
-  if (!dentry_ctx)
+  ctx_shared = bpf_map_lookup_elem(&heap_map, &key);
+  if (!ctx_shared)
     return 0;
 
   /* optional: clear it */
-  __builtin_memset(dentry_ctx, 0, sizeof(*dentry_ctx));
-  dentry_ctx->before_size = 4096;
-  dentry_ctx->inode = BPF_CORE_READ(ino, i_ino);
-  dentry_ctx->dev = BPF_CORE_READ(ino, i_sb, s_dev);
-  __builtin_memset(dentry_ctx->filepath, 0, sizeof(dentry_ctx->filepath));
-  construct_path(dentry, dentry_ctx->filepath, &dentry_ctx->len);
+  __builtin_memset(ctx_shared, 0, sizeof(*ctx_shared));
+  ctx_shared->delete_ctx.before_size = 4096;
+  ctx_shared->delete_ctx.inode = BPF_CORE_READ(ino, i_ino);
+  ctx_shared->delete_ctx.dev = BPF_CORE_READ(ino, i_sb, s_dev);
+  __builtin_memset(ctx_shared->delete_ctx.filepath, 0,
+                   sizeof(ctx_shared->delete_ctx.filepath));
+  construct_path(dentry, ctx_shared->delete_ctx.filepath,
+                 &ctx_shared->delete_ctx.len);
 
-  bpf_map_update_elem(&LruMap, &pid_tgid, dentry_ctx, BPF_ANY);
+  bpf_map_update_elem(&LruMap, &pid_tgid, ctx_shared, BPF_ANY);
 
   return 0;
 }
@@ -147,22 +151,22 @@ int BPF_KRETPROBE(fexit_vfs_rmdir, int ret) {
 
   struct EVENT *event;
   struct KEY key = {};
-  struct dentry_ctx *dentry_ctx;
+  union ctx *ctx_shared;
   u64 pid_tgid;
 
   bpf_printk("fexit_vfs_rmdir: %d", ret);
   pid_tgid = bpf_get_current_pid_tgid();
   // read the saved data at fentry
-  dentry_ctx = bpf_map_lookup_elem(&LruMap, &pid_tgid);
-  if (!dentry_ctx)
+  ctx_shared = bpf_map_lookup_elem(&LruMap, &pid_tgid);
+  if (!ctx_shared)
     return 0;
 
   if (ret < 0)
     goto out;
 
   // deletion is sucess full remove entry from inode map
-  key.inode = dentry_ctx->inode;
-  key.dev = dentry_ctx->dev;
+  key.inode = ctx_shared->delete_ctx.inode;
+  key.dev = ctx_shared->delete_ctx.dev;
   bpf_map_delete_elem(&InodeMap, &key);
 
   // reserve space in ring buffer
@@ -171,15 +175,15 @@ int BPF_KRETPROBE(fexit_vfs_rmdir, int ret) {
     goto out;
 
   // populate the event
-  event->before_size = dentry_ctx->before_size;
+  event->before_size = ctx_shared->delete_ctx.before_size;
   event->uid = bpf_get_current_uid_gid() >> 32;
   event->bytes_written = 0;
   event->file_size = 0;
   event->change_type = DELETE_EVENT;
-  event->len = dentry_ctx->len;
+  event->len = ctx_shared->delete_ctx.len;
   getTTY(event);
 
-  __builtin_memcpy(event->filepath, dentry_ctx->filepath,
+  __builtin_memcpy(event->filepath, ctx_shared->delete_ctx.filepath,
                    sizeof(event->filepath));
 
   print_event("fexit_vfs_rmdir", event);
