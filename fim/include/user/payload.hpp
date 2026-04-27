@@ -19,7 +19,7 @@ struct Payload {
 static inline std::string serializePayload(const Payload *p) {
   return "{\"file_path\":\"" + p->file_path + "\",\"tty\":\"" + p->tty +
          "\",\"username\":\"" + p->username + "\",\"from_ip\":\"" + p->from_ip +
-         "\",\"time_stamp\":\"" + p->time_stamp + "\",\"change_type\":\"" +
+         "\",\"timestamp\":\"" + p->time_stamp + "\",\"change_type\":\"" +
          p->change_type + "\",\"checksum\":\"" + p->checksum +
          "\",\"before_size\":\"" + p->before_size + "\",\"after_size\":\"" +
          p->after_size + "\",\"file_size\":\"" + p->file_size + "\"}";

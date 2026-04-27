@@ -46,13 +46,13 @@ void Logger::log(void *payload) {
   const Payload *p = (const Payload *)payload;
   std::string data = serializePayload(p);
 
-  std::string host = url;
-  std::string path = "/events";
-
 #ifdef CPPHTTPLIB_OPENSSL_SUPPORT
-  httplib::SSLClient cli(host);
+  httplib::SSLClient cli("10.182.0.73", 8443);
+  cli.enable_server_certificate_verification(false); // for self-signed certs
 #else
-  httplib::Client cli(host);
+  // HTTPS requires SSL support — this path will fail
+  fprintf(stderr, "Logger: HTTPS not supported\n");
+  return;
 #endif
 
   cli.set_connection_timeout(std::chrono::milliseconds(timeout_ms));
@@ -62,7 +62,7 @@ void Logger::log(void *payload) {
     h.insert({key, val});
   }
 
-  auto res = cli.Post(path, h, data, "application/json");
+  auto res = cli.Post("/api/v1/file_integrity", h, data, "application/json");
 
   if (!res) {
     fprintf(stderr, "Logger: request failed\n");
@@ -71,6 +71,8 @@ void Logger::log(void *payload) {
 
   if (res->status < 200 || res->status >= 300) {
     fprintf(stderr, "Logger: server rejected log HTTP %d\n", res->status);
+    fprintf(stderr, "Status: %d\n", res->status);
+    fprintf(stderr, "Body: %s\n", res->body.c_str());
   }
 }
 
