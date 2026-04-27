@@ -86,9 +86,7 @@ struct delete_ctx {
 };
 
 struct create_ctx {
-  __u32 child_inode;
-  __u32 child_dev;
-  __u32 i_mode;
+  struct dentry *dentry;
   char filepath[MAX_PATH_LEN];
   __u64 len;
 };

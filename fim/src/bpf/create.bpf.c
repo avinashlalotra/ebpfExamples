@@ -72,9 +72,7 @@ int BPF_KPROBE(fim_vfs_mkdir_kprobe, struct mnt_idmap *idmap, struct inode *dir,
 
   __builtin_memset(ctx_shared, 0, sizeof(*ctx_shared));
 
-  ctx_shared->create_ctx.child_inode = BPF_CORE_READ(child_inode, i_ino);
-  ctx_shared->create_ctx.child_dev = BPF_CORE_READ(child_inode, i_sb, s_dev);
-  ctx_shared->create_ctx.i_mode = BPF_CORE_READ(child_inode, i_mode);
+  ctx_shared->create_ctx.dentry = dentry;
   __builtin_memset(ctx_shared->create_ctx.filepath, 0,
                    sizeof(ctx_shared->create_ctx.filepath));
 
@@ -90,6 +88,8 @@ int BPF_KRETPROBE(fexit_vfs_mkdir, int ret) {
   union ctx *ctx_shared;
   u64 pid_tgid;
   struct EVENT *event;
+  struct dentry *dentry;
+  struct inode *child_inode;
 
   if (ret != 0) {
     bpf_printk("vfs_mkdir_kretprobe: ret != 0");
@@ -102,6 +102,9 @@ int BPF_KRETPROBE(fexit_vfs_mkdir, int ret) {
     bpf_printk("vfs_mkdir_kretprobe: heap map not found");
     return 0;
   }
+  dentry = ctx_shared->create_ctx.dentry;
+  child_inode = BPF_CORE_READ(dentry, d_inode);
+  update_dir_map(child_inode, true);
 
   event = bpf_ringbuf_reserve(&rb, sizeof(*event), 0);
   if (!event) {
@@ -123,7 +126,7 @@ int BPF_KRETPROBE(fexit_vfs_mkdir, int ret) {
   print_event("fexit_vfs_mkdir", event);
   bpf_ringbuf_submit(event, 0);
 
-  update_dir_map(ctx_shared, true);
+  // update_dir_map(ctx_shared, true);
   return 0;
 }
 
