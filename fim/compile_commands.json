@@ -12,17 +12,15 @@
       "-I../../include",
       "-DCONFIG_CREATE",
       "-DCONFIG_DELETE",
-      "-DCONFIG_MODIFY",
-      "-DCONFIG_RENAME",
       "-DCONFIG_BPF",
       "-c",
       "-o",
       "maps.bpf.o",
       "maps.bpf.c"
     ],
-    "directory": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf",
-    "file": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/maps.bpf.c",
-    "output": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/maps.bpf.o"
+    "directory": "/home/abinash/Desktop/ebpf/fim/src/bpf",
+    "file": "/home/abinash/Desktop/ebpf/fim/src/bpf/maps.bpf.c",
+    "output": "/home/abinash/Desktop/ebpf/fim/src/bpf/maps.bpf.o"
   },
   {
     "arguments": [
@@ -37,17 +35,15 @@
       "-I../../include",
       "-DCONFIG_CREATE",
       "-DCONFIG_DELETE",
-      "-DCONFIG_MODIFY",
-      "-DCONFIG_RENAME",
       "-DCONFIG_BPF",
       "-c",
       "-o",
       "create.bpf.o",
       "create.bpf.c"
     ],
-    "directory": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf",
-    "file": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/create.bpf.c",
-    "output": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/create.bpf.o"
+    "directory": "/home/abinash/Desktop/ebpf/fim/src/bpf",
+    "file": "/home/abinash/Desktop/ebpf/fim/src/bpf/create.bpf.c",
+    "output": "/home/abinash/Desktop/ebpf/fim/src/bpf/create.bpf.o"
   },
   {
     "arguments": [
@@ -62,67 +58,15 @@
       "-I../../include",
       "-DCONFIG_CREATE",
       "-DCONFIG_DELETE",
-      "-DCONFIG_MODIFY",
-      "-DCONFIG_RENAME",
       "-DCONFIG_BPF",
       "-c",
       "-o",
       "delete.bpf.o",
       "delete.bpf.c"
     ],
-    "directory": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf",
-    "file": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/delete.bpf.c",
-    "output": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/delete.bpf.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-g",
-      "-O2",
-      "-target",
-      "bpf",
-      "-mcpu=v3",
-      "-D__TARGET_ARCH_x86",
-      "-I../../include/bpf",
-      "-I../../include",
-      "-DCONFIG_CREATE",
-      "-DCONFIG_DELETE",
-      "-DCONFIG_MODIFY",
-      "-DCONFIG_RENAME",
-      "-DCONFIG_BPF",
-      "-c",
-      "-o",
-      "modify.bpf.o",
-      "modify.bpf.c"
-    ],
-    "directory": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf",
-    "file": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/modify.bpf.c",
-    "output": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/modify.bpf.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/clang",
-      "-g",
-      "-O2",
-      "-target",
-      "bpf",
-      "-mcpu=v3",
-      "-D__TARGET_ARCH_x86",
-      "-I../../include/bpf",
-      "-I../../include",
-      "-DCONFIG_CREATE",
-      "-DCONFIG_DELETE",
-      "-DCONFIG_MODIFY",
-      "-DCONFIG_RENAME",
-      "-DCONFIG_BPF",
-      "-c",
-      "-o",
-      "rename.bpf.o",
-      "rename.bpf.c"
-    ],
-    "directory": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf",
-    "file": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/rename.bpf.c",
-    "output": "/home/abinash/Desktop/ebpfExamples/C++/src/bpf/rename.bpf.o"
+    "directory": "/home/abinash/Desktop/ebpf/fim/src/bpf",
+    "file": "/home/abinash/Desktop/ebpf/fim/src/bpf/delete.bpf.c",
+    "output": "/home/abinash/Desktop/ebpf/fim/src/bpf/delete.bpf.o"
   },
   {
     "arguments": [
@@ -132,16 +76,17 @@
       "-I../../include/user",
       "-I../../include",
       "-pthread",
-      "-DCONFIG_RENAME",
       "-DDEBUG_TOKENS",
       "-DDEBUG_PARSER",
+      "-DDEBUG_USERSPACE_FILTER",
+      "-DCPPHTTPLIB_OPENSSL_SUPPORT",
       "-o",
       "main.o",
       "main.cpp"
     ],
-    "directory": "/home/abinash/Desktop/ebpfExamples/C++/src/user",
-    "file": "/home/abinash/Desktop/ebpfExamples/C++/src/user/main.cpp",
-    "output": "/home/abinash/Desktop/ebpfExamples/C++/src/user/main.o"
+    "directory": "/home/abinash/Desktop/ebpf/fim/src/user",
+    "file": "/home/abinash/Desktop/ebpf/fim/src/user/main.cpp",
+    "output": "/home/abinash/Desktop/ebpf/fim/src/user/main.o"
   },
   {
     "arguments": [
@@ -151,16 +96,37 @@
       "-I../../include/user",
       "-I../../include",
       "-pthread",
-      "-DCONFIG_RENAME",
       "-DDEBUG_TOKENS",
       "-DDEBUG_PARSER",
+      "-DDEBUG_USERSPACE_FILTER",
+      "-DCPPHTTPLIB_OPENSSL_SUPPORT",
+      "-o",
+      "logging.o",
+      "logging.cpp"
+    ],
+    "directory": "/home/abinash/Desktop/ebpf/fim/src/user",
+    "file": "/home/abinash/Desktop/ebpf/fim/src/user/logging.cpp",
+    "output": "/home/abinash/Desktop/ebpf/fim/src/user/logging.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-I../../include/user",
+      "-I../../include",
+      "-pthread",
+      "-DDEBUG_TOKENS",
+      "-DDEBUG_PARSER",
+      "-DDEBUG_USERSPACE_FILTER",
+      "-DCPPHTTPLIB_OPENSSL_SUPPORT",
       "-o",
       "event.o",
       "event.cpp"
     ],
-    "directory": "/home/abinash/Desktop/ebpfExamples/C++/src/user",
-    "file": "/home/abinash/Desktop/ebpfExamples/C++/src/user/event.cpp",
-    "output": "/home/abinash/Desktop/ebpfExamples/C++/src/user/event.o"
+    "directory": "/home/abinash/Desktop/ebpf/fim/src/user",
+    "file": "/home/abinash/Desktop/ebpf/fim/src/user/event.cpp",
+    "output": "/home/abinash/Desktop/ebpf/fim/src/user/event.o"
   },
   {
     "arguments": [
@@ -170,15 +136,56 @@
       "-I../../include/user",
       "-I../../include",
       "-pthread",
-      "-DCONFIG_RENAME",
       "-DDEBUG_TOKENS",
       "-DDEBUG_PARSER",
+      "-DDEBUG_USERSPACE_FILTER",
+      "-DCPPHTTPLIB_OPENSSL_SUPPORT",
       "-o",
       "parser.o",
       "parser.cpp"
     ],
-    "directory": "/home/abinash/Desktop/ebpfExamples/C++/src/user",
-    "file": "/home/abinash/Desktop/ebpfExamples/C++/src/user/parser.cpp",
-    "output": "/home/abinash/Desktop/ebpfExamples/C++/src/user/parser.o"
+    "directory": "/home/abinash/Desktop/ebpf/fim/src/user",
+    "file": "/home/abinash/Desktop/ebpf/fim/src/user/parser.cpp",
+    "output": "/home/abinash/Desktop/ebpf/fim/src/user/parser.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-I../../include/user",
+      "-I../../include",
+      "-pthread",
+      "-DDEBUG_TOKENS",
+      "-DDEBUG_PARSER",
+      "-DDEBUG_USERSPACE_FILTER",
+      "-DCPPHTTPLIB_OPENSSL_SUPPORT",
+      "-o",
+      "userspacefilter.o",
+      "userspacefilter.cpp"
+    ],
+    "directory": "/home/abinash/Desktop/ebpf/fim/src/user",
+    "file": "/home/abinash/Desktop/ebpf/fim/src/user/userspacefilter.cpp",
+    "output": "/home/abinash/Desktop/ebpf/fim/src/user/userspacefilter.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++20",
+      "-I../../include/user",
+      "-I../../include",
+      "-pthread",
+      "-DDEBUG_TOKENS",
+      "-DDEBUG_PARSER",
+      "-DDEBUG_USERSPACE_FILTER",
+      "-DCPPHTTPLIB_OPENSSL_SUPPORT",
+      "-o",
+      "processevent.o",
+      "processevent.cpp"
+    ],
+    "directory": "/home/abinash/Desktop/ebpf/fim/src/user",
+    "file": "/home/abinash/Desktop/ebpf/fim/src/user/processevent.cpp",
+    "output": "/home/abinash/Desktop/ebpf/fim/src/user/processevent.o"
   }
 ]

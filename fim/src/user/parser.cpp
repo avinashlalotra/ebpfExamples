@@ -105,8 +105,8 @@ int Parser::syntaxValidation() {
   std::unordered_map<std::string, int> rules = {
       {"D", 1}, {"E", 1}, {"EE", 1}, {"ES", 1}, {"IF", 1}, {"EP", 1}, {"P", 1}};
 
-  std::unordered_map<std::string, int> metadata = {{"API_URL", 1},
-                                                   {"API_HEADER", 1}};
+  std::unordered_map<std::string, int> metadata = {
+      {"API_URL", 1}, {"API_HEADER", 1}, {"API_PORT", 1}};
 
   for (const auto &token : *tokens) {
     if (rules.contains(token.command)) {
@@ -164,6 +164,16 @@ int Parser::semanticValidation() {
     if (token.command == "API_URL") {
       if (token.argument.empty()) {
         fprintf(stderr, "%s:%d: error: invalid url format '%s'\n",
+                policyFilePath.c_str(), token.lineNumber,
+                token.argument.c_str());
+        return -1;
+      }
+      continue;
+    }
+
+    if (token.command == "API_PORT") {
+      if (token.argument.empty()) {
+        fprintf(stderr, "%s:%d: error: invalid port format '%s'\n",
                 policyFilePath.c_str(), token.lineNumber,
                 token.argument.c_str());
         return -1;
@@ -353,6 +363,8 @@ int Parser::fill_exclusion_rules() {
     } else if (token.command == "API_HEADER") {
       auto [name, value] = split_once(token.argument, '=');
       api_header->push_back({name, value});
+    } else if (token.command == "API_PORT") {
+      api_port = std::stoi(token.argument);
     }
   }
 

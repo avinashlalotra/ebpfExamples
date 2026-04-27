@@ -12,6 +12,7 @@ public:
 
 private:
   std::string url;
+  int port;
   std::map<std::string, std::string> headers;
   int timeout_ms = 5000;
 };

@@ -9,7 +9,8 @@ config      ::= section+
 
 section     ::= api_section | rules_section
 
-api_section ::= "API_URL:" whitespace? url
+api_section ::= "API_URL:" whitespace? url 
+              | "API_PORT:" whitespace? port
               | "API_HEADER:" whitespace? header
 
 rules_section ::= rule+

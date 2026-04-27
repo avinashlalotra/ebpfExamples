@@ -53,6 +53,7 @@ public:
 
   /* API configuration */
   std::string *api_url;
+  int api_port;
   std::vector<std::pair<std::string, std::string>> *api_header;
 
   /* exclusion rules */

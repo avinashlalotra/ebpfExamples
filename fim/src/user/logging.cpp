@@ -11,6 +11,7 @@ void Logger::init(void *parser) {
 
   int size = p->api_header->size();
   url = *p->api_url;
+  port = p->api_port;
 
   if (url.empty()) {
     fprintf(stderr, "Logger::init Api url is empty.Loggging is disabled. \n");
@@ -47,7 +48,7 @@ void Logger::log(void *payload) {
   std::string data = serializePayload(p);
 
 #ifdef CPPHTTPLIB_OPENSSL_SUPPORT
-  httplib::SSLClient cli("10.182.0.73", 8443);
+  httplib::SSLClient cli(url, port);
   cli.enable_server_certificate_verification(false); // for self-signed certs
 #else
   // HTTPS requires SSL support — this path will fail
