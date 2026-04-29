@@ -220,10 +220,8 @@ int BPF_KPROBE(fim_do_truncate, struct mnt_idmap *idmap, struct dentry *dentry,
   returns 0 on success
   @length new file size
 */
-SEC("fexit/do_truncate")
-int BPF_PROG(fexit_vfs_truncate, struct mnt_idmap *idmap, struct dentry *dentry,
-             loff_t length, unsigned int time_attrs, struct file *filp,
-             int ret) {
+SEC("kretprobe/do_truncate")
+int BPF_KPROBE(fim_vfs_truncate, int ret) {
 
   struct EVENT *event;
   union ctx *ctx_shared;
@@ -244,9 +242,9 @@ int BPF_PROG(fexit_vfs_truncate, struct mnt_idmap *idmap, struct dentry *dentry,
   event->before_size = ctx_shared->write_ctx.before_size;
   event->change_type = WRITE_EVENT;
   event->uid = bpf_get_current_uid_gid() >> 32;
-  event->bytes_written =
-      (__s64)ctx_shared->write_ctx.before_size - (__s64)length;
-  event->file_size = length;
+  event->bytes_written = (__s64)ctx_shared->write_ctx.before_size -
+                         (__s64)ctx_shared->write_ctx.new_size;
+  event->file_size = ctx_shared->write_ctx.new_size;
   construct_path(ctx_shared->write_ctx.ptr, event->filepath, &event->len);
   getTTY(event);
 
