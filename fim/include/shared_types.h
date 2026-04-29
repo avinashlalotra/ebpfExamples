@@ -63,7 +63,7 @@ struct dentry_ctx {
 struct EVENT {
   __u32 uid;
   __u32 change_type;
-  __u64 bytes_written;
+  __s64 bytes_written;
   __s64 file_size;
   __s64 before_size;
   __u32 tty_major;
@@ -73,8 +73,11 @@ struct EVENT {
 };
 struct write_ctx {
   __u64 before_size;
-  char filepath[MAX_PATH_LEN];
-  __u64 len;
+
+  /**
+   *  @dentry for vfs_write
+   */
+  void *ptr;
 };
 
 struct delete_ctx {
