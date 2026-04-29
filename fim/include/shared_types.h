@@ -78,6 +78,8 @@ struct write_ctx {
    *  @dentry for vfs_write
    */
   void *ptr;
+
+  __u64 new_size;
 };
 
 struct delete_ctx {
