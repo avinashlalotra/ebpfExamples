@@ -19,7 +19,7 @@ SEC("kprobe/vfs_unlink")
 int BPF_KPROBE(fentry_vfs_unlink, struct mnt_idmap *idmap, struct inode *dir,
                struct dentry *dentry, struct inode **delegated_inode) {
 
-  struct VALUE *value;
+  bool value;
 
   // check if parent directory is monitored
   value = is_monitored(dir);
@@ -108,7 +108,7 @@ SEC("kprobe/vfs_rmdir")
 int BPF_KPROBE(fentry_vfs_rmdir, struct mnt_idmap *idmap, struct inode *dir,
                struct dentry *dentry) {
 
-  struct VALUE *value;
+  bool value;
   struct inode *ino;
   u64 pid_tgid;
 

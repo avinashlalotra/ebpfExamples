@@ -13,7 +13,7 @@ int BPF_KPROBE(fim_inode_create_kprobe, struct inode *inode,
                struct dentry *dentry) {
 
   struct inode *parent_inode;
-  struct VALUE *value;
+  bool value;
 
   parent_inode = BPF_CORE_READ(dentry, d_parent, d_inode);
 
