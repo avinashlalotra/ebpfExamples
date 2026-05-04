@@ -39,27 +39,6 @@ struct VALUE {
   __u64 dummy;
 };
 
-struct dentry_ctx {
-  __u64 inode;
-  __u64 dev;
-  char filepath[MAX_PATH_LEN];
-  __s64 before_size;
-  __u64 len;
-#ifdef CONFIG_RENAME
-  bool is_dir;
-  bool is_old_dir_mon;
-  bool is_new_dir_mon;
-  bool is_new_dir;
-  __u64 target_ino;
-  __u64 target_dev;
-  __s64 target_size;
-  bool unused;
-  bool inode_mon;    // folder itself is monitored
-  bool is_cross_dir; // old_dir != new_dir
-  bool overwrite;
-#endif
-};
-
 struct EVENT {
   __u32 uid;
   __u32 change_type;
@@ -96,8 +75,22 @@ struct create_ctx {
   __u64 len;
 };
 
+struct rename_ctx {
+  struct renamedata *rd;
+  struct inode *old_inode;
+  struct inode *replaced_inode;
+  char filepath[MAX_PATH_LEN];
+  __u64 len;
+  bool isDir;
+  bool source;
+  bool destination;
+  __u64 src_before_size;
+  __u64 dest_before_size;
+  bool overwrite;
+};
+
 union ctx {
-  struct dentry_ctx dentry_ctx;
+  struct rename_ctx rename_ctx;
   struct write_ctx write_ctx;
   struct delete_ctx delete_ctx;
   struct create_ctx create_ctx;
