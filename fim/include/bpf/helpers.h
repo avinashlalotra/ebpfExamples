@@ -48,16 +48,22 @@ static __always_inline void getTTY(struct EVENT *event) {
   event->tty_minor = BPF_CORE_READ(task, signal, tty, index);
 }
 
-static __always_inline struct VALUE *is_monitored(struct inode *dir) {
+static bool is_monitored(struct inode *dir) {
   struct KEY key = {};
   struct VALUE *value;
+
+  if (!dir)
+    return false;
+
   key.inode = BPF_CORE_READ(dir, i_ino);
   key.dev = BPF_CORE_READ(dir, i_sb, s_dev);
 
-  bpf_printk("is_monitored: %ld,%ld", key.inode, key.dev);
   value = (struct VALUE *)bpf_map_lookup_elem(&InodeMap, &key);
 
-  return value;
+  if (value)
+    return true;
+
+  return false;
 }
 
 static __always_inline void print_event(const char *msg, struct EVENT *event) {
