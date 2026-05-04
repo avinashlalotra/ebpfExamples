@@ -5,6 +5,7 @@
 #include <linux/bpf.h>
 #include <unistd.h>
 
+#include "daemon.hpp"
 #include "event.hpp"
 #include "logging.hpp"
 #include "parser.hpp"
@@ -73,6 +74,9 @@ int main(int argc, char **argv) {
   }
 
   fprintf(stderr, "Successfully compiled parser\n");
+
+  // // Config validation passed, now daemonize
+  Daemon::init();
 
   skel = fentry_bpf::open_and_load();
 
