@@ -1,6 +1,6 @@
 INCLUDE_DIR = ../../include/user
 INCLUDE = ../../include
-PROG_NAME = fentry
+PROG_NAME = fim
 
 CXX = g++
 CXXFLAGS = -std=c++20 -I$(INCLUDE_DIR) -I$(INCLUDE) -pthread
@@ -10,7 +10,7 @@ LDFLAGS = -lbpf -pthread
 USER_SRCS = logging.cpp event.cpp parser.cpp userspacefilter.cpp  processevent.cpp daemon.cpp
 USER_OBJS = $(USER_SRCS:.cpp=.o)
 
-MAIN_SRC = main.cpp 
+MAIN_SRC = fim.cpp 
 MAIN_OBJ = $(MAIN_SRC:.cpp=.o)
 
 CONFIG_DEBUG_TOKENS = y
