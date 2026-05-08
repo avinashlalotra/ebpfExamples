@@ -3,7 +3,7 @@
 
 class Daemon {
 public:
-    static void init();
+    static void init(const char* pid_file_path = "/var/run/fim.pid");
 };
 
 #endif // DAEMON_HPP
