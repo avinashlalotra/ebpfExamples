@@ -56,6 +56,11 @@ bool UserspaceFilter::filterEvent(void *event) {
     return false;
   }
 
+  // filter if bytes written are 0
+  if (eventObj->change_type == WRITE_EVENT && eventObj->bytes_written == 0) {
+    return true;
+  }
+
   // filepath buffer -> string
   std::string filename(eventObj->filepath);
 
@@ -77,14 +82,6 @@ bool UserspaceFilter::filterEvent(void *event) {
     if (filename.size() >= suffix.size() &&
         filename.compare(filename.size() - suffix.size(), suffix.size(),
                          suffix) == 0) {
-      return true;
-    }
-  }
-
-  // ---- prefix check ----
-  for (const auto &prefix : filter.exclude_prefix) {
-
-    if (filename.compare(0, prefix.size(), prefix) == 0) {
       return true;
     }
   }
