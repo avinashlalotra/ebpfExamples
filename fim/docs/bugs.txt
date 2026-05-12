@@ -1,0 +1,18 @@
+Known Bugs & Limitations
+========================
+
+1. Directory Rename Scope Checking
+        If a directory is renamed, the eBPF program incorrectly 
+        overwrites the parent directory scope check with the directory's own inode. 
+        If an unmonitored directory is moved into a monitored directory,
+        it will incorrectly be ignored. (To be fixed later).
+
+2. Hardcoded HTTPS Client in Logger
+     The user-space logger unconditionally uses `httplib::SSLClient` to send logs to the API.
+     If the API uses `http://` instead of `https://`, it will fail.
+    (Will be addressed later, potentially with a debug compile switch).
+
+3. Long Filename Truncation
+    Linux filenames can be up to 255 bytes long. However, the eBPF program reads path components into 32-byte slots (`PER_LEVEL`). Filenames exceeding 31 characters will be silently truncated in the reported events. This is an intentional design choice to balance memory overhead and performance.
+    This is intentional - as we can't use d_path() ebpf helper , so we got to implement path construction ourself
+    This can be fixed path_construction() in helpers.h but i won't recommend you because ebpf verifier is not a good guy.

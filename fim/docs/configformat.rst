@@ -35,7 +35,8 @@ API CONFIGURATION
 
 API_URL: <url>
     Endpoint used for sending policy results, reports, or telemetry.
-
+API_PORT: <port>
+    Port number for 
 API_HEADER: <key>=<value>
     HTTP header included in API requests.
     Multiple headers may be specified using multiple API_HEADER entries.
@@ -81,7 +82,8 @@ API_HEADER: X-Agent-ID=node-01
 EXAMPLE
 -------
 
-API_URL: https://security.example.com/v1/policy/report
+API_URL:security.example.com/v1/policy/report
+API_PORT: 8888
 API_HEADER: Authorization=Bearer
 API_HEADER: Content-Type=application/json
 API_HEADER: X-Agent-ID=host-01
