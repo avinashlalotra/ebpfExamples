@@ -1,0 +1,7 @@
+# Exclude patterns
+P: \.lesshs[a-zA-Z0-9]+$
+P: \.[0-9]+$
+P: [0-9]
+P: \.bash_history(-\d+\.tmp|\.pts_\d+|\.ttymxc\d+)?$
+
+# this is a comment
