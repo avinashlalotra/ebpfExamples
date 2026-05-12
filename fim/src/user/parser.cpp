@@ -81,10 +81,11 @@ int Parser::tokenize() {
     }
 
     auto [command, argument] = split_once(line, ':');
-    command.erase(std::remove_if(command.begin(), command.end(), ::isspace),
-                  command.end());
-    argument.erase(std::remove_if(argument.begin(), argument.end(), ::isspace),
-                   argument.end());
+    command.erase(command.begin(), std::find_if(command.begin(), command.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    command.erase(std::find_if(command.rbegin(), command.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), command.end());
+    
+    argument.erase(argument.begin(), std::find_if(argument.begin(), argument.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    argument.erase(std::find_if(argument.rbegin(), argument.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), argument.end());
     Token token(lineNumber, command, argument);
     tokens->push_back(token);
     lineNumber++;
@@ -234,12 +235,6 @@ void Parser::printParser() const {
   printf("Exclude suffixes: \n");
   for (const auto &suffix : userSpaceFilter->exclude_suffix) {
     printf("ES: %s\n", suffix.c_str());
-  }
-
-  // print exclude prefix
-  printf("Exclude prefixes: \n");
-  for (const auto &prefix : userSpaceFilter->exclude_prefix) {
-    printf("EP: %s\n", prefix.c_str());
   }
 }
 #endif
