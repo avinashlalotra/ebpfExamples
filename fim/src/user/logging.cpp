@@ -3,6 +3,7 @@
 #include "payload.hpp"
 #include <cstdio>
 #include <httplib.h>
+#include <syslog.h>
 #define DEBUG_LOGGER
 
 void Logger::init(void *parser) {
@@ -66,14 +67,12 @@ void Logger::log(void *payload) {
   auto res = cli.Post("/api/v1/file_integrity", h, data, "application/json");
 
   if (!res) {
-    fprintf(stderr, "Logger: request failed\n");
+    syslog(LOG_ERR, "Logger: request failed");
     return;
   }
 
   if (res->status < 200 || res->status >= 300) {
-    fprintf(stderr, "Logger: server rejected log HTTP %d\n", res->status);
-    fprintf(stderr, "Status: %d\n", res->status);
-    fprintf(stderr, "Body: %s\n", res->body.c_str());
+    syslog(LOG_ERR, "Logger: server rejected log HTTP %d, Status: %d, Body: %s", res->status, res->status, res->body.c_str());
   }
 }
 

@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <cstring>
 #include <sys/types.h>
+#include <syslog.h>
 #include <thread>
 #include <unistd.h>
 
@@ -112,9 +113,6 @@ int Cmdline::run() {
   fprintf(stderr, "Starting program\n");
   parser = new Parser(config);
 
-  // Config validation passed, now daemonize
-  Daemon::init(pid.c_str());
-
   err = parser->compile();
   if (err) {
     fprintf(stderr, "Failed to compile parser\n");
@@ -147,11 +145,13 @@ int Cmdline::run() {
 
   logger.init(parser);
   fprintf(stderr, "Successfully initialized logger\n");
-
+  delete parser;
   events = new Events(skel->maps.rb);
 
   printf("Successfully started!\n");
   printf("Run: sudo cat /sys/kernel/debug/tracing/trace_pipe\n");
+  // Config validation passed, now daemonize
+  Daemon::init(pid.c_str());
 
   signal(SIGINT, handle_signal);
   signal(SIGTERM, handle_signal);
@@ -167,11 +167,10 @@ int Cmdline::run() {
   producer_thread.join();
   consumer_thread.join();
   delete events;
-  delete parser;
 
 cleanup:
   fentry_bpf::destroy(skel);
-  printf("Successfully cleaned up\n");
+  syslog(LOG_INFO, "Successfully cleaned up");
   return err;
 }
 

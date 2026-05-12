@@ -4,6 +4,7 @@
 #include <ctime>
 #include <ifaddrs.h>
 #include <pwd.h>
+#include <syslog.h>
 #include <unistd.h>
 #include <vector>
 
@@ -25,8 +26,8 @@ Payload ProcessEvent::Process(EVENT *event) {
 
   Payload p;
 #ifdef DEBUG_PROCESS_EVENT
-  printf("Event: tty_major=%d, tty_minor=%d, uid=%d, change_type=%d, "
-         "before_size=%lld, file_size=%lld, len=%d\n",
+  syslog(LOG_DEBUG, "Event: tty_major=%d, tty_minor=%d, uid=%d, change_type=%d, "
+         "before_size=%lld, file_size=%lld, len=%d",
          event->tty_major, event->tty_minor, event->uid,
          static_cast<int>(event->change_type), event->before_size,
          event->file_size, event->len);
@@ -131,9 +132,9 @@ std::string ProcessEvent::changeType(EVENT *event) {
 
 void ProcessEvent::print_event(Payload *p) {
 
-  printf(
+  syslog(LOG_INFO,
       "Event: username=%s, change_type=%s, file_path=%s, tty=%s, from_ip=%s, "
-      "timestamp=%s, before_size=%s, after_size=%s, file_size=%s\n",
+      "timestamp=%s, before_size=%s, after_size=%s, file_size=%s",
       p->username.c_str(), p->change_type.c_str(), p->file_path.c_str(),
       p->tty.c_str(), p->from_ip.c_str(), p->time_stamp.c_str(),
       p->before_size.c_str(), p->after_size.c_str(), p->file_size.c_str());

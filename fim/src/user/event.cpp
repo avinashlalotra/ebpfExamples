@@ -6,6 +6,7 @@
 #include <bpf/libbpf.h>
 #include <cstdio>
 #include <cstring>
+#include <syslog.h>
 
 int callback(void *ctx, void *data, size_t size);
 void print_event(EVENT *event);
@@ -35,12 +36,15 @@ Events::~Events() {
 }
 
 void Events::producer() {
-  while (!stop_flag) {
+  while (!stop_flag.load()) {
 
     int ret = ring_buffer__poll(rb, 100); // blocking
 
+    if (ret == -EINTR)
+      continue;
+
     if (ret < 0) {
-      fprintf(stderr, "ring_buffer__poll error: %d\n", ret);
+      syslog(LOG_ERR, "ring_buffer__poll error: %d", ret);
       break;
     }
   }
@@ -49,13 +53,14 @@ void Events::producer() {
 void Events::consumer() {
 
   Payload p;
-  while (!stop_flag) {
+  while (!stop_flag.load()) {
 
     std::unique_lock<std::mutex> lock(queue_mutex);
 
-    queue_cv.wait(lock, [this] { return stop_flag || !event_queue.empty(); });
+    queue_cv.wait(lock,
+                  [this] { return stop_flag.load() || !event_queue.empty(); });
 
-    if (stop_flag && event_queue.empty())
+    if (stop_flag.load() && event_queue.empty())
       return;
 
     EVENT event = event_queue.front();
@@ -64,7 +69,7 @@ void Events::consumer() {
     lock.unlock();
 
     if (filter.filterEvent(&event)) {
-      printf("Event filtered %s\n", event.filepath);
+      syslog(LOG_INFO, "Event filtered %s", event.filepath);
       continue;
     }
 
@@ -77,7 +82,7 @@ void Events::consumer() {
 }
 
 void Events::stop() {
-  stop_flag = true;
+  stop_flag.store(true);
   queue_cv.notify_all(); // wake consumer
 }
 
