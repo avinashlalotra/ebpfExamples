@@ -1,10 +1,10 @@
 .cache
-fentry
+fim
 include/bpf/vmlinux.h
 include/user/fentry_bpf.skel.h
 src/bpf/*.o
 src/user/*.o
 src/bpf/*_bpf
-tmp
 scripts/*.out
 buil*
+tes*
