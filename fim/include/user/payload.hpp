@@ -16,11 +16,40 @@ struct Payload {
   std::string file_size;
 };
 
+static inline std::string escapeJsonString(const std::string& input) {
+  std::string output;
+  output.reserve(input.length());
+  for (char c : input) {
+    if (c == '"') {
+      output += "\\\"";
+    } else if (c == '\\') {
+      output += "\\\\";
+    } else if (c == '\b') {
+      output += "\\b";
+    } else if (c == '\f') {
+      output += "\\f";
+    } else if (c == '\n') {
+      output += "\\n";
+    } else if (c == '\r') {
+      output += "\\r";
+    } else if (c == '\t') {
+      output += "\\t";
+    } else if (static_cast<unsigned char>(c) <= 0x1f) {
+      char buf[8];
+      snprintf(buf, sizeof(buf), "\\u%04x", c);
+      output += buf;
+    } else {
+      output += c;
+    }
+  }
+  return output;
+}
+
 static inline std::string serializePayload(const Payload *p) {
-  return "{\"file_path\":\"" + p->file_path + "\",\"tty\":\"" + p->tty +
-         "\",\"username\":\"" + p->username + "\",\"from_ip\":\"" + p->from_ip +
-         "\",\"timestamp\":\"" + p->time_stamp + "\",\"change_type\":\"" +
-         p->change_type + "\",\"checksum\":\"" + p->checksum +
+  return "{\"file_path\":\"" + escapeJsonString(p->file_path) + "\",\"tty\":\"" + escapeJsonString(p->tty) +
+         "\",\"username\":\"" + escapeJsonString(p->username) + "\",\"from_ip\":\"" + escapeJsonString(p->from_ip) +
+         "\",\"timestamp\":\"" + escapeJsonString(p->time_stamp) + "\",\"change_type\":\"" +
+         escapeJsonString(p->change_type) + "\",\"checksum\":\"" + escapeJsonString(p->checksum) +
          "\",\"before_size\":\"" + p->before_size + "\",\"after_size\":\"" +
          p->after_size + "\",\"file_size\":\"" + p->file_size + "\"}";
 }
