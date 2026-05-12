@@ -2,8 +2,8 @@ CXX = g++
 CXXFLAGS = -std=c++20 -Wall -Wextra -I../../include/user -I../../include -pthread -DCPPHTTPLIB_OPENSSL_SUPPORT
 LDFLAGS = -lssl -lcrypto
 
-TARGET_REGEX = test_regex
-TARGET_PARSER = test_parser
+TARGET_REGEX = test_regex.tst
+TARGET_PARSER = test_parser.tst
 SRCS_REGEX = test_regex.cpp ../user/parser.cpp ../user/userspacefilter.cpp
 SRCS_PARSER = test_parser.cpp ../user/parser.cpp ../user/userspacefilter.cpp
 
